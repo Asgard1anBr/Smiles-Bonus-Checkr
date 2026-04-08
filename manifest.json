@@ -1,0 +1,23 @@
+{
+  "name": "Smiles Bonus Tracker",
+  "short_name": "Smiles Tracker",
+  "description": "Monitor automático de bônus Smiles",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0c15",
+  "theme_color": "#0a0c15",
+  "start_url": ".",
+  "scope": ".",
+  "categories": [
+    "finance",
+    "travel"
+  ],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3E%3Crect%20width='512'%20height='512'%20rx='64'%20fill='%23ff6b00'/%3E%3Ctext%20x='50%25'%20y='55%25'%20dominant-baseline='middle'%20text-anchor='middle'%20font-size='280'%3E%E2%9C%88%EF%B8%8F%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

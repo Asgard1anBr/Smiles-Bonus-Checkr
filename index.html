@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smiles Bonus Tracker</title>
+<meta name="description" content="Rastreador automático de bônus e promoções Smiles - Monitoramento a cada 20 minutos">
+<meta name="theme-color" content="#0a0c15">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>">
+<link rel="manifest" crossorigin="use-credentials" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Smiles%20Bonus%20Tracker%22%2C%22short_name%22%3A%22Smiles%20Tracker%22%2C%22description%22%3A%22Monitor%20autom%C3%A1tico%20de%20b%C3%B4nus%20Smiles%22%2C%22display%22%3A%22standalone%22%2C%22orientation%22%3A%22any%22%2C%22background_color%22%3A%22%230a0c15%22%2C%22theme_color%22%3A%22%230a0c15%22%2C%22start_url%22%3A%22.%22%2C%22scope%22%3A%22.%22%2C%22categories%22%3A%5B%22finance%22%2C%22travel%22%5D%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%2520viewBox%3D%270%25200%2520512%2520512%27%253E%253Crect%2520width%3D%27512%27%2520height%3D%27512%27%2520rx%3D%2764%27%2520fill%3D%27%2523ff6b00%27%2F%253E%253Ctext%2520x%3D%2750%2525%27%2520y%3D%2755%2525%27%2520dominant-baseline%3D%27middle%27%2520text-anchor%3D%27middle%27%2520font-size%3D%27280%27%253E%25E2%259C%2588%25EF%25B8%258F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0a0c15;--bg2:#111425;--card:#161934;--cardH:#1c2045;
+--acc:#ff6b00;--accL:#ff9d4d;--grad:linear-gradient(135deg,#ff6b00,#ff9d4d);
+--t1:#f0f0f5;--t2:#8b8da3;--t3:#5c5e72;
+--brd:rgba(255,255,255,.06);--ok:#00d68f;--r:16px
+}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(ellipse at 20% 50%,rgba(255,107,0,.04) 0%,transparent 50%),radial-gradient(ellipse at 80% 20%,rgba(255,157,77,.03) 0%,transparent 50%);animation:bf 20s ease-in-out infinite;z-index:0;pointer-events:none}
+@keyframes bf{0%,100%{transform:translate(0,0)}33%{transform:translate(2%,-2%)}66%{transform:translate(-1%,1%)}}
+
+.hdr{position:sticky;top:0;z-index:100;background:rgba(10,12,21,.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--brd);padding:0 24px}
+.hdr-in{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-ic{width:46px;height:46px;background:var(--grad);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 24px rgba(255,107,0,.35);animation:logoGlow 3s ease-in-out infinite alternate}
+@keyframes logoGlow{0%{box-shadow:0 4px 20px rgba(255,107,0,.3)}100%{box-shadow:0 4px 30px rgba(255,107,0,.5)}}
+.logo-t h1{font-size:20px;font-weight:800;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.5px}
+.logo-t span{font-size:11px;color:var(--t3);font-weight:500;letter-spacing:1.5px;text-transform:uppercase}
+.hdr-act{display:flex;align-items:center;gap:12px}
+.badge{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(0,214,143,.08);border:1px solid rgba(0,214,143,.15);border-radius:50px;font-size:12px;font-weight:600;color:var(--ok)}
+.dot{width:8px;height:8px;background:var(--ok);border-radius:50%;animation:pls 2s ease-in-out infinite}
+@keyframes pls{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(0,214,143,.4)}50%{opacity:.7;box-shadow:0 0 0 6px rgba(0,214,143,0)}}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .3s;border:none;text-decoration:none}
+.btn-p{background:var(--grad);color:#fff;box-shadow:0 4px 15px rgba(255,107,0,.3)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(255,107,0,.45)}
+.btn-g{background:rgba(255,255,255,.05);color:var(--t2);border:1px solid var(--brd)}
+.btn-g:hover{background:rgba(255,255,255,.1);color:var(--t1)}
+.btn-refresh{position:relative;overflow:hidden}
+.btn-refresh.loading::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);animation:btnShim .8s infinite}
+@keyframes btnShim{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+.main{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:32px 24px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.sc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:20px 24px;display:flex;align-items:center;gap:16px;transition:all .3s}
+.sc:hover{border-color:rgba(255,107,0,.2);transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.si{width:50px;height:50px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.si.o{background:rgba(255,107,0,.12)}.si.g{background:rgba(0,214,143,.12)}.si.b{background:rgba(56,139,253,.12)}.si.p{background:rgba(163,113,247,.12)}
+.sv h3{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
+.sv p{font-size:12px;color:var(--t3);font-weight:500;margin-top:5px}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.st{font-size:18px;font-weight:700;display:flex;align-items:center;gap:10px}
+.ft{display:flex;gap:6px}
+.ftb{padding:7px 16px;border-radius:50px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid var(--brd);background:transparent;color:var(--t3);transition:all .25s}
+.ftb.a,.ftb:hover{background:var(--grad);color:#fff;border-color:transparent;box-shadow:0 3px 12px rgba(255,107,0,.2)}
+
+/* CARDS */
+.og{display:flex;flex-direction:column;gap:14px}
+.oc{background:var(--card);border:1px solid var(--brd);border-radius:var(--r);padding:24px 28px;transition:all .35s;position:relative;overflow:hidden;animation:fiu .5s ease forwards;opacity:0}
+.oc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--grad);border-radius:0 4px 4px 0;opacity:0;transition:opacity .3s}
+.oc:hover{border-color:rgba(255,107,0,.2);background:var(--cardH);transform:translateX(6px);box-shadow:0 12px 35px rgba(0,0,0,.35)}
+.oc:hover::before{opacity:1}
+@keyframes fiu{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.oc:nth-child(1){animation-delay:.05s}.oc:nth-child(2){animation-delay:.1s}.oc:nth-child(3){animation-delay:.15s}.oc:nth-child(4){animation-delay:.2s}.oc:nth-child(5){animation-delay:.25s}
+
+.ot{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:14px}
+.om{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.stag{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:50px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.stag.mc{background:rgba(255,107,0,.1);color:var(--accL);border:1px solid rgba(255,107,0,.2)}
+.stag.ppv{background:rgba(56,139,253,.1);color:#6db3f8;border:1px solid rgba(56,139,253,.2)}
+.ttag{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--t3);font-weight:500}
+.bb{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:linear-gradient(135deg,rgba(255,107,0,.15),rgba(255,157,77,.08));border:1px solid rgba(255,107,0,.3);border-radius:50px;font-size:14px;font-weight:800;color:var(--accL);white-space:nowrap;text-shadow:0 0 20px rgba(255,107,0,.3)}
+.otit{font-size:17px;font-weight:700;line-height:1.5;margin-bottom:8px}
+.osum{font-size:13.5px;line-height:1.7;color:var(--t2);margin-bottom:18px}
+.of{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.otags{display:flex;gap:6px;flex-wrap:wrap}
+.tg{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,.04);color:var(--t3);border:1px solid rgba(255,255,255,.05)}
+.tg.bn{background:rgba(255,107,0,.08);color:var(--accL);border-color:rgba(255,107,0,.15)}
+.tg.tr{background:rgba(0,214,143,.08);color:var(--ok);border-color:rgba(0,214,143,.15)}
+.ba{display:inline-flex;align-items:center;gap:8px;padding:11px 24px;background:var(--grad);color:#fff;border-radius:50px;font-size:13px;font-weight:700;text-decoration:none;transition:all .3s;box-shadow:0 4px 18px rgba(255,107,0,.28);white-space:nowrap}
+.ba:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 8px 28px rgba(255,107,0,.42)}
+
+.emp{text-align:center;padding:80px 20px;color:var(--t3)}
+.emp .ic{font-size:56px;margin-bottom:16px}.emp h3{font-size:20px;margin-bottom:8px;color:var(--t2)}
+
+/* TOAST */
+.tc{position:fixed;top:84px;right:24px;z-index:200;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.tst{background:rgba(22,25,52,.95);backdrop-filter:blur(12px);border:1px solid rgba(255,107,0,.25);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);animation:sli .4s ease,fdo .4s ease 5s forwards;max-width:400px;pointer-events:auto}
+@keyframes sli{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes fdo{to{transform:translateX(120%);opacity:0}}
+.tst .ti{font-size:26px;flex-shrink:0}
+.tst h4{font-size:13px;font-weight:700;margin-bottom:3px}
+.tst p{font-size:12px;color:var(--t2);line-height:1.4}
+
+/* COUNTDOWN */
+.cd{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t3);font-weight:500}
+.cdb{width:100px;height:4px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+.cdf{height:100%;background:var(--grad);border-radius:10px;transition:width 1s linear}
+
+/* INSTALL */
+.ib{background:linear-gradient(135deg,rgba(255,107,0,.1),rgba(255,157,77,.05));border:1px solid rgba(255,107,0,.2);border-radius:var(--r);padding:22px 28px;display:none;align-items:center;justify-content:space-between;margin-bottom:28px;gap:16px}
+.ib.show{display:flex}
+.ii{display:flex;align-items:center;gap:14px}
+.ii .ic{font-size:30px}
+.ii h3{font-size:15px;font-weight:700}
+.ii p{font-size:12px;color:var(--t2);margin-top:3px}
+
+/* SKELETON */
+.sk{background:linear-gradient(90deg,var(--card) 25%,var(--cardH) 50%,var(--card) 75%);background-size:200% 100%;animation:shm 1.5s infinite;border-radius:var(--r);height:150px;margin-bottom:14px}
+@keyframes shm{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(10px);z-index:300;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.mo.show{opacity:1;pointer-events:all}
+.md{background:var(--bg2);border:1px solid var(--brd);border-radius:24px;padding:40px;max-width:440px;width:90%;text-align:center;transform:scale(.9);transition:transform .3s}
+.mo.show .md{transform:scale(1)}
+.md .ic{font-size:52px;margin-bottom:18px}
+.md h2{font-size:22px;font-weight:800;margin-bottom:10px}
+.md p{font-size:14px;color:var(--t2);margin-bottom:28px;line-height:1.7}
+.md .mb{display:flex;gap:12px;justify-content:center}
+
+.ftr{text-align:center;padding:36px 24px;color:var(--t3);font-size:12px;border-top:1px solid var(--brd);margin-top:48px;line-height:1.8}
+.ftr a{color:var(--accL);text-decoration:none;transition:color .2s}
+.ftr a:hover{color:#fff}
+
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:10px}::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.15)}
+
+@media(max-width:768px){
+.hdr-in{height:60px}.logo-t span,.hm{display:none}
+.stats{grid-template-columns:repeat(2,1fr)}
+.ot{flex-direction:column}.of{flex-direction:column;gap:12px;align-items:flex-start}
+.ft{display:none}.ib{flex-direction:column;text-align:center}
+.cdb{width:60px}
+}
+@media(max-width:480px){.stats{grid-template-columns:1fr}.main{padding:16px 12px}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+ <div class="hdr-in">
+  <div class="logo">
+   <div class="logo-ic">✈️</div>
+   <div class="logo-t"><h1>Smiles Tracker</h1><span>Monitor de Bônus</span></div>
+  </div>
+  <div class="hdr-act">
+   <div class="cd" id="cd">
+    <span>⏱️</span><span id="cdt">20:00</span>
+    <div class="cdb"><div class="cdf" id="cdf" style="width:100%"></div></div>
+   </div>
+   <div class="badge"><div class="dot"></div><span class="hm">Monitorando</span></div>
+   <button class="btn btn-g btn-refresh" id="refreshBtn" onclick="doRefresh()" title="Atualizar agora">🔄 <span class="hm">Atualizar</span></button>
+  </div>
+ </div>
+</header>
+
+<div class="tc" id="tc"></div>
+
+<div class="mo" id="nmod">
+ <div class="md">
+  <div class="ic">🔔</div>
+  <h2>Ativar Notificações Push</h2>
+  <p>Receba alertas instantâneos quando novas promoções de bônus Smiles forem detectadas. Nunca mais perca uma oportunidade de bonificação!</p>
+  <div class="mb">
+   <button class="btn btn-g" onclick="clMod()">Agora não</button>
+   <button class="btn btn-p" onclick="reqNotif()">🔔 Ativar Alertas</button>
+  </div>
+ </div>
+</div>
+
+<div class="main">
+ <div class="ib" id="ib">
+  <div class="ii"><div class="ic">📲</div><div><h3>Instale como aplicativo</h3><p>Acesse rapidamente pela barra de tarefas do Windows</p></div></div>
+  <button class="btn btn-p" onclick="doInstall()">⬇️ Instalar App</button>
+ </div>
+
+ <div class="stats">
+  <div class="sc"><div class="si o">🔥</div><div class="sv"><h3 id="s1">—</h3><p>Ofertas Smiles ativas</p></div></div>
+  <div class="sc"><div class="si g">💰</div><div class="sv"><h3 id="s2">—</h3><p>Maior bônus encontrado</p></div></div>
+  <div class="sc"><div class="si b">🔍</div><div class="sv"><h3 id="s3">2</h3><p>Fontes monitoradas</p></div></div>
+  <div class="sc"><div class="si p">🕐</div><div class="sv"><h3 id="s4">—</h3><p>Última verificação</p></div></div>
+ </div>
+
+ <div class="sh">
+  <div class="st"><span>🎯</span> Promoções de Bônus Smiles</div>
+  <div class="ft">
+   <button class="ftb a" onclick="doFilter('all',this)">Todas</button>
+   <button class="ftb" onclick="doFilter('bonus',this)">🎁 Bônus</button>
+   <button class="ftb" onclick="doFilter('transfer',this)">🔄 Transferência</button>
+   <button class="ftb" onclick="doFilter('buy',this)">🛒 Compra/Clube</button>
+  </div>
+ </div>
+
+ <div class="og" id="og">
+  <div class="sk"></div><div class="sk"></div><div class="sk"></div>
+ </div>
+
+ <div class="ftr">
+  <p>✈️ <strong>Smiles Bonus Tracker</strong> — Monitoramento automático a cada 20 minutos</p>
+  <p>Fontes: <a href="https://www.melhorescartoes.com.br/c/promocoes-milhas" target="_blank">MelhoresCartões</a> · <a href="https://pontospravoar.com/category/acumulando-milhas/" target="_blank">Pontos Pra Voar</a></p>
+ </div>
+</div>
+
+<script>
+/*================================================================
+  SMILES BONUS TRACKER — Single-file PWA
+  Monitora bônus Smiles a cada 20 minutos com push notifications
+================================================================*/
+
+// ---- CONFIG ----
+const PX = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?url='
+];
+const SRC = {
+    mc: { n:'MelhoresCartões', u:'https://www.melhorescartoes.com.br/c/promocoes-milhas', b:'https://www.melhorescartoes.com.br' },
+    ppv: { n:'Pontos Pra Voar', u:'https://pontospravoar.com/category/acumulando-milhas/', b:'https://pontospravoar.com' }
+};
+
+// ---- SEED DATA (real, scraped 08/04/2026) ----
+const SEED = [
+    { title:"Smiles Oferece Até 365% de Bônus na Compra de Milhas",
+      summary:"A Smiles está oferecendo até 365% de bônus na compra direta de milhas. Excelente oportunidade para acumular milhas com altíssimo rendimento. Promoção válida por tempo limitado — aproveite!",
+      url:"https://www.melhorescartoes.com.br/comprar-milhas-smiles-365-abr26.html",
+      time:"08/04/2026 às 14:49", timeAgo:"Hoje", source:"mc", author:"Daniel Gadelha",
+      tags:["bonus","buy"], bp:"365%" },
+    { title:"Milheiro Smiles a Partir de R$ 16,56 — Transferência Inter Loop",
+      summary:"Transfira pontos do Inter Loop para a Smiles e obtenha o milheiro a partir de R$ 16,56. Excelente custo-benefício para quem acumula pontos pelo Banco Inter.",
+      url:"https://www.melhorescartoes.com.br/pontos-dinheiro-inter-loop-smiles-abr26.html",
+      time:"07/04/2026 às 11:15", timeAgo:"Ontem", source:"mc", author:"Daniel Gadelha",
+      tags:["transfer","bonus"], bp:"R$16,56/mil" },
+    { title:"Prorrogou! Assine o Clube 2.000 da Smiles e Receba 20.000 Milhas na Adesão",
+      summary:"Promoção prorrogada: ao assinar o Clube Smiles 2.000, você ganha 20.000 milhas bônus de boas-vindas. Ideal para acumular milhas com recorrência mensal e aproveitar o super bônus de entrada.",
+      url:"https://pontospravoar.com/prorrogou-assine-clube-2000-smiles-receba-20000-milhas-adesao/",
+      time:"7 de abril de 2026", timeAgo:"1 dia atrás", source:"ppv", author:"Pontos Pra Voar",
+      tags:["bonus","buy"], bp:"20.000 milhas" },
+    { title:"Transfira Pontos do Inter Loop e Ganhe Até 80% de Bônus na Smiles",
+      summary:"A Smiles está oferecendo até 80% de bônus para quem transferir pontos do programa Inter Loop. Momento excelente para converter pontos bancários em milhas aéreas Smiles.",
+      url:"https://pontospravoar.com/transfira-pontos-inter-loop-ganhe-ate-80-porcento-bonus-smiles/",
+      time:"6 de abril de 2026", timeAgo:"2 dias atrás", source:"ppv", author:"Pontos Pra Voar",
+      tags:["bonus","transfer"], bp:"80%" }
+];
+
+let offers = [], prevUrls = new Set(), dfp = null, cds = 1200, cdi = null, curF = 'all';
+const $ = id => document.getElementById(id);
+
+// ---- INIT ----
+document.addEventListener('DOMContentLoaded', () => {
+    const c = localStorage.getItem('sbt4');
+    if (c) { try { const p = JSON.parse(c); offers = p?.length ? p : [...SEED] } catch { offers = [...SEED] } }
+    else offers = [...SEED];
+    prevUrls = new Set(offers.map(o => o.url));
+    save(); render(offers); updStats(); startCD(); regSW();
+    if ('Notification' in window && Notification.permission === 'default')
+        setTimeout(() => $('nmod').classList.add('show'), 2500);
+    setInterval(() => doRefresh(), 1200000); // 20 min
+    setTimeout(() => doRefresh(), 3500);     // first fetch
+});
+
+function save() { localStorage.setItem('sbt4', JSON.stringify(offers)) }
+
+// ---- PWA INSTALL ----
+window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); dfp = e; $('ib').classList.add('show');
+});
+async function doInstall() {
+    if (!dfp) return; dfp.prompt();
+    const { outcome } = await dfp.userChoice;
+    if (outcome === 'accepted') toast('✅', 'App Instalado!', 'Smiles Tracker adicionado à sua barra de tarefas.');
+    dfp = null; $('ib').classList.remove('show');
+}
+
+// ---- SERVICE WORKER (inline blob) ----
+function regSW() {
+    if (!('serviceWorker' in navigator)) return;
+    const sw = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(clients.claim()));
+self.addEventListener('notificationclick', e => {
+    e.notification.close();
+    if (e.notification.data) e.waitUntil(clients.openWindow(e.notification.data));
+});
+self.addEventListener('fetch', () => {});`;
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], { type: 'application/javascript' }))).catch(() => {});
+}
+
+// ---- NOTIFICATIONS ----
+function clMod() { $('nmod').classList.remove('show') }
+async function reqNotif() {
+    if ('Notification' in window) {
+        const p = await Notification.requestPermission();
+        if (p === 'granted') toast('🔔', 'Notificações ativadas!', 'Você receberá alertas de novas promoções Smiles.');
+    }
+    clMod();
+}
+function pushN(title, body, url) {
+    if ('Notification' in window && Notification.permission === 'granted') {
+        const n = new Notification(title, {
+            body, tag: 'smiles-' + Date.now(), renotify: true,
+            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>"
+        });
+        n.onclick = () => { window.open(url, '_blank'); n.close(); };
+    }
+}
+
+// ---- FETCH VIA CORS PROXY ----
+async function fetchP(url) {
+    for (const p of PX) {
+        try {
+            const r = await fetch(p + encodeURIComponent(url), { signal: AbortSignal.timeout(15000) });
+            if (r.ok) return await r.text();
+        } catch { continue; }
+    }
+    return null;
+}
+
+// ---- PARSER ----
+function parse(html, sk) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const res = [], seen = new Set();
+    doc.querySelectorAll('a[href]').forEach(a => {
+        const txt = (a.textContent || '').trim().replace(/\s+/g, ' ');
+        let hr = a.getAttribute('href') || '';
+        if (txt.length < 25 || !txt.toLowerCase().includes('smiles')) return;
+        if (!hr.startsWith('http')) hr = SRC[sk].b + hr;
+        if (seen.has(hr)) return; seen.add(hr);
+
+        const pct = txt.match(/(\d+)\s*%/);
+        const mil = txt.match(/([\d.]+)\s*(?:mil\s+)?milhas/i);
+        const tags = [], lo = txt.toLowerCase();
+        if (lo.includes('bônus') || lo.includes('bonus') || pct) tags.push('bonus');
+        if (lo.includes('transfer') || lo.includes('pontos')) tags.push('transfer');
+        if (lo.includes('compr') || lo.includes('clube') || lo.includes('assine')) tags.push('buy');
+        if (!tags.length) tags.push('bonus');
+
+        let tm = '';
+        const pa = a.closest('article, li, div, .post');
+        if (pa) {
+            const te = pa.querySelector('time, .date, [class*="date"], [class*="time"], [class*="meta"]');
+            if (te) tm = te.textContent.trim();
+        }
+
+        res.push({
+            title: txt,
+            summary: 'Promoção Smiles detectada: ' + txt.substring(0, 150) + (txt.length > 150 ? '...' : ''),
+            url: hr,
+            time: tm || new Date().toLocaleDateString('pt-BR'),
+            timeAgo: tm ? '' : 'Recente',
+            source: sk,
+            author: SRC[sk].n,
+            tags: [...new Set(tags)],
+            bp: pct ? pct[0] : (mil ? mil[0] : null)
+        });
+    });
+    return res;
+}
+
+// ---- REFRESH ----
+async function doRefresh() {
+    const btn = $('refreshBtn');
+    btn.classList.add('loading');
+    $('og').innerHTML = '<div class="sk"></div><div class="sk"></div><div class="sk"></div>';
+
+    let fetched = [], ok = false;
+    try {
+        const [mh, ph] = await Promise.all([fetchP(SRC.mc.u), fetchP(SRC.ppv.u)]);
+        if (mh) { fetched.push(...parse(mh, 'mc')); ok = true; }
+        if (ph) { fetched.push(...parse(ph, 'ppv')); ok = true; }
+    } catch {}
+
+    btn.classList.remove('loading');
+
+    if (ok && fetched.length) {
+        const m = new Map();
+        fetched.forEach(o => { if (!m.has(o.url)) m.set(o.url, o) });
+        const u = Array.from(m.values());
+        const nw = u.filter(o => !prevUrls.has(o.url));
+        if (nw.length) {
+            nw.forEach(o => {
+                pushN('🔥 Nova Promoção Smiles!', o.title, o.url);
+                toast('🔥', 'Nova promoção detectada!', o.title);
+            });
+        } else {
+            toast('✅', 'Verificação concluída', u.length + ' oferta(s) Smiles encontrada(s). Sem novidades.');
+        }
+        offers = u;
+        prevUrls = new Set(u.map(o => o.url));
+        save();
+    } else if (!ok) {
+        if (!offers.length) offers = [...SEED];
+        toast('⚠️', 'Usando dados em cache', 'Fontes indisponíveis. Nova tentativa em 20 min.');
+    } else {
+        toast('ℹ️', 'Sem ofertas Smiles', 'Nenhuma promoção Smiles encontrada nas fontes agora.');
+    }
+
+    render(offers, curF); updStats(); rstCD();
+}
+
+// ---- RENDER ----
+const TL = { bonus: '🎁 Bônus', transfer: '🔄 Transferência', buy: '🛒 Compra/Clube' };
+const TC = { bonus: 'bn', transfer: 'tr', buy: '' };
+
+function render(data, f) {
+    f = f || 'all';
+    const g = $('og');
+    const d = f === 'all' ? data : data.filter(o => o.tags.includes(f));
+    if (!d.length) {
+        g.innerHTML = '<div class="emp"><div class="ic">🔍</div><h3>Nenhuma oferta encontrada</h3><p>Nenhuma promoção Smiles com esse filtro no momento. Verificaremos novamente em breve.</p></div>';
+        return;
+    }
+    g.innerHTML = d.map((o, i) => `
+    <div class="oc" style="animation-delay:${i * .07}s">
+      <div class="ot">
+        <div class="om">
+          <span class="stag ${o.source}">${o.source === 'mc' ? '📰 MelhoresCartões' : '✈️ Pontos Pra Voar'}</span>
+          <span class="ttag">🕐 ${o.time}${o.timeAgo ? ' · ' + o.timeAgo : ''}</span>
+        </div>
+        ${o.bp ? `<span class="bb">🔥 ${o.bp}</span>` : ''}
+      </div>
+      <h3 class="otit">${o.title}</h3>
+      <p class="osum">${o.summary}</p>
+      <div class="of">
+        <div class="otags">
+          ${o.tags.map(t => `<span class="tg ${TC[t] || ''}">${TL[t] || t}</span>`).join('')}
+          ${o.author ? `<span class="tg">✍️ ${o.author}</span>` : ''}
+        </div>
+        <a href="${o.url}" target="_blank" rel="noopener noreferrer" class="ba">Acessar oferta →</a>
+      </div>
+    </div>`).join('');
+}
+
+function updStats() {
+    $('s1').textContent = offers.length;
+    const b = offers.filter(o => o.bp).map(o => {
+        const m = o.bp.match(/(\d+)/);
+        return m ? { v: +m[1], l: o.bp } : null;
+    }).filter(Boolean).sort((a, b) => b.v - a.v);
+    $('s2').textContent = b.length ? b[0].l : '—';
+    $('s4').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+// ---- FILTERS ----
+function doFilter(f, btn) {
+    curF = f;
+    document.querySelectorAll('.ftb').forEach(t => t.classList.remove('a'));
+    if (btn) btn.classList.add('a');
+    render(offers, f);
+}
+
+// ---- COUNTDOWN ----
+function startCD() {
+    cds = 1200; updCD();
+    cdi = setInterval(() => {
+        cds--;
+        if (cds <= 0) { doRefresh(); cds = 1200; }
+        updCD();
+    }, 1000);
+}
+function rstCD() { cds = 1200; updCD(); }
+function updCD() {
+    const m = Math.floor(cds / 60), s = cds % 60;
+    $('cdt').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    $('cdf').style.width = (cds / 1200 * 100) + '%';
+}
+
+// ---- TOAST ----
+function toast(ic, t, msg) {
+    const c = $('tc'), e = document.createElement('div');
+    e.className = 'tst';
+    e.innerHTML = `<span class="ti">${ic}</span><div><h4>${t}</h4><p>${msg.length > 100 ? msg.substring(0, 100) + '...' : msg}</p></div>`;
+    c.appendChild(e);
+    setTimeout(() => { if (e.parentNode) e.remove(); }, 6500);
+}
+</script>
+</body>
+</html>
